@@ -18,6 +18,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data) -> AccountUser:
+        validated_data.pop('password_verify')
         return super().create(validated_data)
 
 
@@ -26,8 +27,14 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 
-class SignInSerializer(serializers.ModelSerializer):
+class ChangePasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(required=True)
+    new_password_verify = serializers.CharField(required=True)
+    old_password = serializers.CharField(required=True)
 
-    class Meta:
-        model = AccountUser
-        fields = ['email','password']
+    def validate(self, attrs):
+        if attrs['new_password'] == attrs['old_password']:
+            raise serializers.ValidationError('New password can not be same as old password.')
+        if attrs['new_password'] == attrs['new_password_verify']:
+            raise serializers.ValidationError('New Password and Verify Password field did not match.')
+        return super().validate(attrs)
