@@ -3,7 +3,7 @@ from .models import AccountUser
 
 class RegistrationSerializer(serializers.ModelSerializer):    
 
-    password_verify = serializers.CharField()
+    password_verify = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password_verify']:
@@ -12,18 +12,20 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AccountUser
-        # fields = ['verified','phone','password_verify']
         exclude = ['is_staff','last_login','date_joined','verified','is_superuser','is_active']
         
 
 
     def create(self, validated_data) -> AccountUser:
-        validated_data.pop('password_verify')
-        return super().create(validated_data)
+        user : AccountUser = AccountUser.objects.create(
+        phone = validated_data.get('phone'),
+        first_name = validated_data.get('first_name'),
+        last_name = validated_data.get('last_name'),
+        email = validated_data.get('email'))
+        user.set_password(validated_data.get('password'))
 
-
-    def update(self, instance, validated_data):
-        return super().update(instance, validated_data)
+        user.save()
+        return user
 
 
 
