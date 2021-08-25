@@ -37,6 +37,13 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate(self, attrs):
         if attrs['new_password'] == attrs['old_password']:
             raise serializers.ValidationError('New password can not be same as old password.')
-        if attrs['new_password'] == attrs['new_password_verify']:
+        if attrs['new_password'] != attrs['new_password_verify']:
             raise serializers.ValidationError('New Password and Verify Password field did not match.')
         return super().validate(attrs)
+
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['new_password'])
+        instance.save()
+
+        return instance

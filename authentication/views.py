@@ -1,3 +1,4 @@
+from datetime import datetime
 from rest_framework import response
 from authentication.models import AccountUser
 from rest_framework.request import Request
@@ -20,9 +21,6 @@ class RegisterView(APIView):
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST,data=serializer.errors)
 
-    def get_serializer(self):
-        return RegistrationSerializer()
-
 
 
 class ChangePasswordView(APIView):
@@ -34,9 +32,7 @@ class ChangePasswordView(APIView):
         if(serializer.is_valid()):
             user : AccountUser = request.user
             if(user.check_password(request.data['old_password'])):
-                instance : AccountUser = serializer.update(request.user,serializer.validated_data)
-                instance.set_password(request.data['new_password'])
-                instance.save()
+                serializer.update(instance=request.user,validated_data=serializer.validated_data)
                 return Response({
                     'message':"Password Changed Successfully"
                 },status=status.HTTP_202_ACCEPTED)
